@@ -1,0 +1,104 @@
+.auth-page {
+  min-height: calc(100vh - 62px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background: linear-gradient(135deg, var(--verde-bg), var(--dorado-claro));
+}
+
+.auth-card {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: 44px 36px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--tierra-200);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.auth-emoji {
+  font-size: 2.8rem;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+  line-height: 1;
+}
+
+.auth-header h1 {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--tierra);
+  margin-bottom: 6px;
+}
+
+.auth-header p {
+  color: var(--tierra-500);
+  font-size: 0.92rem;
+}
+
+.role-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.role-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 22px 12px;
+  border: 2px solid var(--tierra-200);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  color: var(--tierra-600);
+  transition: all 0.25s;
+}
+.role-option:hover { border-color: var(--verde-suave); }
+.role-option strong { font-size: 0.95rem; }
+.role-option span { font-size: 0.72rem; color: var(--tierra-400); }
+
+.role-option.active-seller {
+  border-color: var(--verde-profundo);
+  background: var(--verde-claro);
+  color: var(--verde-profundo);
+}
+
+.role-option.active-buyer {
+  border-color: var(--naranja);
+  background: var(--naranja-claro);
+  color: var(--naranja);
+}
+
+.forgot-password {
+  display: block;
+  width: 100%;
+  background: none;
+  color: var(--tierra-400);
+  font-size: 0.84rem;
+  font-weight: 500;
+  text-align: center;
+  margin-top: 14px;
+  padding: 8px;
+  transition: color 0.2s;
+}
+.forgot-password:hover { color: var(--naranja); }
+
+.auth-footer {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 0.88rem;
+  color: var(--tierra-400);
+}
+
+.auth-footer a {
+  color: var(--verde-profundo);
+  font-weight: 700;
+}
+.auth-footer a:hover { text-decoration: underline; }

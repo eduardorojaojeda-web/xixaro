@@ -1,0 +1,119 @@
+.navbar {
+  background: var(--hueso);
+  border-bottom: 1px solid var(--tierra-200);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.navbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--verde-profundo);
+}
+
+.brand-icon { font-size: 1.6rem; }
+
+.brand-text {
+  font-family: "Playfair Display", serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--verde-profundo);
+}
+
+.menu-toggle {
+  display: none;
+  background: none;
+  color: var(--tierra-600);
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.messages-link {
+  position: relative;
+}
+
+.unread-badge {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  background: var(--naranja);
+  color: var(--white);
+  font-size: 0.62rem;
+  font-weight: 800;
+  min-width: 17px;
+  height: 17px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  line-height: 1;
+  box-shadow: 0 1px 4px rgba(232, 98, 26, 0.35);
+}
+
+.navbar-links a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  font-size: 0.88rem;
+  color: var(--tierra-600);
+  padding: 8px 12px;
+  border-radius: 50px;
+  transition: all 0.2s;
+}
+
+.navbar-links a:hover {
+  color: var(--naranja);
+  background: var(--naranja-claro);
+}
+
+.navbar-links .btn-primary {
+  color: var(--crema);
+}
+.navbar-links .btn-primary:hover {
+  color: var(--crema);
+  background: var(--verde-hoja);
+}
+
+.navbar-links .btn-outline:hover {
+  color: var(--crema);
+}
+
+@media (max-width: 768px) {
+  .menu-toggle { display: block; }
+
+  .navbar-links {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background: var(--hueso);
+    flex-direction: column;
+    padding: 24px;
+    gap: 10px;
+    border-bottom: 1px solid var(--tierra-200);
+    transform: translateY(-120%);
+    transition: transform 0.3s ease;
+    z-index: 99;
+  }
+
+  .navbar-links.open { transform: translateY(0); }
+  .navbar-links a, .navbar-links button { width: 100%; justify-content: center; }
+}

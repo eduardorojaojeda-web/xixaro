@@ -1,0 +1,32 @@
+.not-found {
+  min-height: calc(100vh - 62px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 20px;
+  background: linear-gradient(135deg, var(--verde-bg), var(--dorado-claro));
+}
+
+.nf-emoji {
+  font-size: 4.5rem;
+  margin-bottom: 8px;
+}
+
+.not-found h1 {
+  font-size: 5.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--verde-profundo), var(--naranja));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 14px;
+}
+
+.not-found p {
+  color: var(--tierra-500);
+  font-size: 1.05rem;
+  margin-bottom: 32px;
+}

@@ -1,0 +1,78 @@
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Marketplace from "./pages/Marketplace";
+import Profile from "./pages/Profile";
+import Chat from "./pages/Chat";
+import ChatList from "./pages/ChatList";
+import Alerts from "./pages/Alerts";
+import NotFound from "./pages/NotFound";
+
+function ProtectedRoute({ children, requiredRole }) {
+  const { currentUser, userData } = useAuth();
+  if (!currentUser) return <Navigate to="/login" />;
+  if (requiredRole && userData?.role !== requiredRole) return <Navigate to="/" />;
+  return children;
+}
+
+function AppRoutes() {
+  return (
+    <>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/registro" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/marketplace" element={<Marketplace />} />
+        <Route path="/perfil/:userId" element={<Profile />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute requiredRole="vendedor">
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/chat/:chatId"
+          element={
+            <ProtectedRoute>
+              <Chat />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/alertas"
+          element={
+            <ProtectedRoute>
+              <Alerts />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/chats"
+          element={
+            <ProtectedRoute>
+              <ChatList />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
