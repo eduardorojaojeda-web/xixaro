@@ -102,3 +102,16 @@
   font-weight: 700;
 }
 .auth-footer a:hover { text-decoration: underline; }
+
+.auth-legal {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 0.75rem;
+  color: var(--tierra-400);
+  line-height: 1.6;
+}
+.auth-legal a {
+  color: var(--verde-hoja);
+  font-weight: 600;
+}
+.auth-legal a:hover { text-decoration: underline; }

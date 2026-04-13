@@ -142,6 +142,10 @@ export default function Register() {
         <p className="auth-footer">
           ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
         </p>
+        <p className="auth-legal">
+          Al crear tu cuenta aceptas los <Link to="/terminos">Términos y Condiciones</Link> y
+          la <Link to="/privacidad">Política de Privacidad</Link>
+        </p>
       </div>
 
       {toast && <div className={`toast ${toast.type}`}>{toast.message}</div>}

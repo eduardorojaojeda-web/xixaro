@@ -122,6 +122,10 @@ export default function Home() {
             <LeafLogo size={22} />
             <span>Xixaro</span>
           </div>
+          <div className="legal-links">
+            <Link to="/terminos">Términos y Condiciones</Link>
+            <Link to="/privacidad">Política de Privacidad</Link>
+          </div>
           <p>Comercio agrícola directo. &copy; {new Date().getFullYear()}</p>
         </div>
       </footer>

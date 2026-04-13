@@ -13,6 +13,8 @@ import Alerts from "./pages/Alerts";
 import NewOrder from "./pages/NewOrder";
 import Orders from "./pages/Orders";
 import Admin from "./pages/Admin";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 
 function ProtectedRoute({ children, requiredRole }) {
@@ -31,6 +33,8 @@ function AppRoutes() {
         <Route path="/registro" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/marketplace" element={<Marketplace />} />
+        <Route path="/terminos" element={<Terms />} />
+        <Route path="/privacidad" element={<Privacy />} />
         <Route path="/perfil/:userId" element={<Profile />} />
         <Route
           path="/dashboard"

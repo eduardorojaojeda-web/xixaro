@@ -96,6 +96,10 @@ export default function Login() {
         <p className="auth-footer">
           ¿No tienes cuenta? <Link to="/registro">Crear cuenta comercial</Link>
         </p>
+        <div className="legal-links" style={{ justifyContent: "center", marginTop: 12 }}>
+          <Link to="/terminos">Términos</Link>
+          <Link to="/privacidad">Privacidad</Link>
+        </div>
       </div>
 
       {toast && <div className={`toast ${toast.type}`}>{toast.message}</div>}
