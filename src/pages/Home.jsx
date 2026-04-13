@@ -104,6 +104,14 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="hiw-link-section">
+        <div className="container" style={{ textAlign: "center" }}>
+          <Link to="/como-funciona" className="btn btn-outline btn-lg">
+            ¿Cómo funciona Xixaro? <ArrowRight size={16} />
+          </Link>
+        </div>
+      </section>
+
       <section className="cta">
         <div className="cta-inner container">
           <div className="cta-text">

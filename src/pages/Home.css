@@ -119,6 +119,11 @@
   padding: 80px 20px;
 }
 
+.hiw-link-section {
+  padding: 40px 20px;
+  background: var(--verde-bg);
+}
+
 .features-header {
   text-align: center;
   margin-bottom: 56px;

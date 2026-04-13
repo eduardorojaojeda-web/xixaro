@@ -147,6 +147,9 @@ export default function Navbar() {
           <Link to="/marketplace" onClick={() => setMenuOpen(false)}>
             <ShoppingBag size={18} /> Marketplace
           </Link>
+          <Link to="/como-funciona" onClick={() => setMenuOpen(false)}>
+            ¿Cómo funciona?
+          </Link>
 
           {currentUser ? (
             <>
