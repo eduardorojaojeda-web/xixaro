@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { db } from "../firebase";
+import { db, rtdb } from "../firebase";
 import { doc, getDoc, addDoc, collection } from "firebase/firestore";
+import { ref as rtdbRef, push as rtdbPush } from "firebase/database";
 import { useAuth } from "../contexts/AuthContext";
 import { ShoppingCart, Calendar, Package, ArrowLeft } from "lucide-react";
 import { useToast } from "../hooks/useToast";
@@ -73,6 +74,15 @@ export default function NewOrder() {
         sellerName: product.sellerName,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+      });
+
+      // Notificar al vendedor que tiene un nuevo pedido
+      rtdbPush(rtdbRef(rtdb, `orderNotifs/${product.sellerId}`), {
+        type: "nuevo_pedido",
+        productName: product.name,
+        buyerName: userData?.name || "Comprador",
+        timestamp: Date.now(),
+        read: false,
       });
 
       showToast("Pedido enviado al productor");

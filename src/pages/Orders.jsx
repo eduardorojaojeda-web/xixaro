@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { db } from "../firebase";
-import { collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
+import { db, rtdb } from "../firebase";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { ref as rtdbRef, onValue as rtdbOnValue, update as rtdbUpdate } from "firebase/database";
 import { useAuth } from "../contexts/AuthContext";
 import { Package, Clock, CheckCircle, Truck, CircleCheck } from "lucide-react";
 import "./Orders.css";
@@ -39,6 +40,24 @@ export default function Orders() {
     });
     return unsub;
   }, [currentUser, field]);
+
+  // Marcar notificaciones de pedidos como leídas al entrar
+  useEffect(() => {
+    if (!currentUser) return;
+    const notifsRef = rtdbRef(rtdb, `orderNotifs/${currentUser.uid}`);
+    const unsub = rtdbOnValue(notifsRef, (snap) => {
+      const data = snap.val();
+      if (!data) return;
+      const updates = {};
+      Object.entries(data).forEach(([id, n]) => {
+        if (!n.read) updates[`${id}/read`] = true;
+      });
+      if (Object.keys(updates).length > 0) {
+        rtdbUpdate(notifsRef, updates);
+      }
+    }, { onlyOnce: true });
+    return () => unsub();
+  }, [currentUser]);
 
   const filtered = filter === "all" ? orders : orders.filter((o) => o.status === filter);
 
@@ -182,10 +201,23 @@ function VendorActions({ order }) {
     setUpdating(true);
     try {
       const { updateDoc, doc } = await import("firebase/firestore");
-      const { db } = await import("../firebase");
+      const { db, rtdb } = await import("../firebase");
+      const { ref: rtdbRef, push: rtdbPush } = await import("firebase/database");
+
+      const newStatus = nextStatus[order.status];
       await updateDoc(doc(db, "orders", order.id), {
-        status: nextStatus[order.status],
+        status: newStatus,
         updatedAt: new Date().toISOString(),
+      });
+
+      // Notificar al comprador del cambio de estado
+      rtdbPush(rtdbRef(rtdb, `orderNotifs/${order.buyerId}`), {
+        type: "estado_actualizado",
+        productName: order.productName,
+        newStatus,
+        sellerName: order.sellerName,
+        timestamp: Date.now(),
+        read: false,
       });
     } catch (err) {
       alert("Error: " + err.message);

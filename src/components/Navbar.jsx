@@ -14,6 +14,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [alertCount, setAlertCount] = useState(0);
+  const [orderCount, setOrderCount] = useState(0);
 
   useEffect(() => {
     if (!currentUser) {
@@ -64,6 +65,31 @@ export default function Navbar() {
     return () => unsub();
   }, [currentUser]);
 
+  // Listen for order notifications
+  useEffect(() => {
+    if (!currentUser) {
+      setOrderCount(0);
+      return;
+    }
+
+    const orderNotifsRef = ref(rtdb, `orderNotifs/${currentUser.uid}`);
+    const unsub = onValue(
+      orderNotifsRef,
+      (snap) => {
+        const data = snap.val();
+        if (!data) { setOrderCount(0); return; }
+        let count = 0;
+        Object.values(data).forEach((n) => {
+          if (!n.read) count++;
+        });
+        setOrderCount(count);
+      },
+      () => setOrderCount(0)
+    );
+
+    return () => unsub();
+  }, [currentUser]);
+
   const handleLogout = async () => {
     await signOut(auth);
     navigate("/");
@@ -95,8 +121,11 @@ export default function Navbar() {
                   <LayoutDashboard size={18} /> Mi Panel
                 </Link>
               )}
-              <Link to="/pedidos" onClick={() => setMenuOpen(false)}>
+              <Link to="/pedidos" onClick={() => setMenuOpen(false)} className="messages-link">
                 <Package size={18} /> Pedidos
+                {orderCount > 0 && (
+                  <span className="unread-badge">{orderCount > 9 ? "9+" : orderCount}</span>
+                )}
               </Link>
               <Link to="/chats" onClick={() => setMenuOpen(false)} className="messages-link">
                 <MessageCircle size={18} /> Mensajes
