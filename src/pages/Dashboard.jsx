@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { db, rtdb, storage } from "../firebase";
-import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, rtdb } from "../firebase";
 import { ref as rtdbRef, get as rtdbGet, push as rtdbPush } from "firebase/database";
 import {
   collection,
@@ -118,7 +117,33 @@ export default function Dashboard() {
     return () => clearTimeout(timer);
   }, [form.name]);
 
-  const MAX_FILE_SIZE = 5_000_000; // 5MB
+  const MAX_BASE64 = 800_000; // 800KB max para Firestore
+
+  const compressImage = (file) =>
+    new Promise((resolve) => {
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let { width, height } = img;
+        const MAX_DIM = 1200;
+        if (width > MAX_DIM || height > MAX_DIM) {
+          const ratio = Math.min(MAX_DIM / width, MAX_DIM / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+        let quality = 0.7;
+        let result = canvas.toDataURL("image/jpeg", quality);
+        while (result.length > MAX_BASE64 && quality > 0.1) {
+          quality -= 0.1;
+          result = canvas.toDataURL("image/jpeg", quality);
+        }
+        resolve(result);
+      };
+      img.src = URL.createObjectURL(file);
+    });
 
   const formatSize = (bytes) => {
     if (bytes < 1024) return `${bytes} B`;
@@ -126,18 +151,26 @@ export default function Dashboard() {
     return `${(bytes / 1_000_000).toFixed(1)} MB`;
   };
 
-  const handleImage = (e) => {
+  const handleImage = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > MAX_FILE_SIZE) {
-      showToast(`La imagen pesa ${formatSize(file.size)}. Máximo permitido: 5 MB.`, "error");
+    setImagePreview(URL.createObjectURL(file));
+    setImageSize({ original: file.size, compressed: null });
+
+    const compressed = await compressImage(file);
+    const compressedBytes = Math.round(compressed.length * 0.75);
+
+    if (compressedBytes > MAX_BASE64) {
+      showToast(`Imagen demasiado grande (${formatSize(compressedBytes)}). Usa una foto más pequeña.`, "error");
+      setImageFile(null);
+      setImagePreview(null);
+      setImageSize(null);
       return;
     }
 
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
-    setImageSize(file.size);
+    setImageFile(compressed);
+    setImageSize({ original: file.size, compressed: compressedBytes });
   };
 
   const resetForm = () => {
@@ -173,19 +206,8 @@ export default function Dashboard() {
     setLoading(true);
 
     try {
-      // Subir imagen a Firebase Storage si hay un archivo nuevo
-      let imageUrl = "";
-      if (imageFile && imageFile instanceof File) {
-        const imgRef = storageRef(
-          storage,
-          `products/${currentUser.uid}/${Date.now()}_${imageFile.name}`
-        );
-        await uploadBytes(imgRef, imageFile);
-        imageUrl = await getDownloadURL(imgRef);
-      } else if (typeof imageFile === "string" && imageFile.length > 0) {
-        // Foto existente (URL de Storage o base64 de productos antiguos)
-        imageUrl = imageFile;
-      }
+      // La imagen ya viene como base64 comprimido o como URL/base64 existente
+      const imageUrl = (typeof imageFile === "string" && imageFile.length > 0) ? imageFile : "";
 
       const productData = {
         name: form.name,
@@ -390,9 +412,14 @@ export default function Dashboard() {
                   className="file-input"
                 />
               </div>
-              {imageSize && (
+              {imageSize && imageSize.original && (
                 <div className="image-size-info">
-                  <span>{formatSize(imageSize)} — se subirá a Firebase Storage</span>
+                  <span>Original: {formatSize(imageSize.original)}</span>
+                  {imageSize.compressed && (
+                    <span className="compressed-ok">
+                      → Comprimida: {formatSize(imageSize.compressed)} ✓
+                    </span>
+                  )}
                 </div>
               )}
             </div>
