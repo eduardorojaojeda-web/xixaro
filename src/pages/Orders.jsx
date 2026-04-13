@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { db, rtdb } from "../firebase";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where, onSnapshot, addDoc, doc, getDoc } from "firebase/firestore";
 import { ref as rtdbRef, onValue as rtdbOnValue, update as rtdbUpdate } from "firebase/database";
 import { useAuth } from "../contexts/AuthContext";
-import { Package, Clock, CheckCircle, Truck, CircleCheck } from "lucide-react";
+import { Package, Clock, CheckCircle, Truck, CircleCheck, AlertTriangle, Send } from "lucide-react";
+import { useToast } from "../hooks/useToast";
 import "./Orders.css";
 
 const STATUS_CONFIG = {
@@ -19,8 +20,10 @@ const STATUS_STEPS = ["pendiente", "confirmado", "en_camino", "entregado"];
 export default function Orders() {
   const { currentUser, userData } = useAuth();
   const [orders, setOrders] = useState([]);
+  const [disputes, setDisputes] = useState({});
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const { toast, showToast } = useToast();
 
   const isVendedor = userData?.role === "vendedor";
   const field = isVendedor ? "sellerId" : "buyerId";
@@ -57,6 +60,23 @@ export default function Orders() {
       }
     }, { onlyOnce: true });
     return () => unsub();
+  }, [currentUser]);
+
+  // Cargar disputas del usuario
+  useEffect(() => {
+    if (!currentUser) return;
+    const q = query(collection(db, "disputes"), where("openedBy", "==", currentUser.uid));
+    const q2 = query(collection(db, "disputes"), where("againstId", "==", currentUser.uid));
+    const map = {};
+    const u1 = onSnapshot(q, (snap) => {
+      snap.docs.forEach((d) => { map[d.data().orderId] = { id: d.id, ...d.data() }; });
+      setDisputes({ ...map });
+    });
+    const u2 = onSnapshot(q2, (snap) => {
+      snap.docs.forEach((d) => { map[d.data().orderId] = { id: d.id, ...d.data() }; });
+      setDisputes({ ...map });
+    });
+    return () => { u1(); u2(); };
   }, [currentUser]);
 
   const filtered = filter === "all" ? orders : orders.filter((o) => o.status === filter);
@@ -100,15 +120,25 @@ export default function Orders() {
       ) : (
         <div className="orders-list">
           {filtered.map((order) => (
-            <OrderCard key={order.id} order={order} isVendedor={isVendedor} />
+            <OrderCard key={order.id} order={order} isVendedor={isVendedor} dispute={disputes[order.id]} showToast={showToast} currentUser={currentUser} userData={userData} />
           ))}
         </div>
       )}
+      {toast && <div className={`toast ${toast.type}`}>{toast.message}</div>}
     </div>
   );
 }
 
-function OrderCard({ order, isVendedor }) {
+const DISPUTE_REASONS = [
+  "Producto no recibido",
+  "Cantidad incorrecta",
+  "Calidad no esperada",
+  "Producto dañado",
+  "Entrega fuera de fecha",
+  "Otro",
+];
+
+function OrderCard({ order, isVendedor, dispute, showToast, currentUser, userData }) {
   const currentStep = STATUS_STEPS.indexOf(order.status);
 
   return (
@@ -176,6 +206,21 @@ function OrderCard({ order, isVendedor }) {
       {/* Vendor actions */}
       {isVendedor && order.status !== "entregado" && (
         <VendorActions order={order} />
+      )}
+
+      {/* Dispute section */}
+      {dispute ? (
+        <div className={`dispute-banner dispute-${dispute.status}`}>
+          <AlertTriangle size={16} />
+          <div>
+            <strong>
+              Disputa {dispute.status === "open" ? "abierta" : dispute.status === "resolved_buyer" ? "resuelta a favor del comprador" : "resuelta a favor del vendedor"}
+            </strong>
+            <p>{dispute.reason}: {dispute.description}</p>
+          </div>
+        </div>
+      ) : (
+        order.status !== "pendiente" && <DisputeButton order={order} currentUser={currentUser} userData={userData} showToast={showToast} />
       )}
     </div>
   );
@@ -248,6 +293,78 @@ function VendorActions({ order }) {
         {STATUS_CONFIG[nextStatus[order.status]].icon}
         {updating ? "Actualizando..." : nextLabel[order.status]}
       </button>
+    </div>
+  );
+}
+
+function DisputeButton({ order, currentUser, userData, showToast }) {
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [description, setDescription] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!reason) { showToast("Selecciona un motivo", "error"); return; }
+    if (description.trim().length < 10) { showToast("Describe el problema con al menos 10 caracteres", "error"); return; }
+    setSending(true);
+    try {
+      const isBuyer = currentUser.uid === order.buyerId;
+      await addDoc(collection(db, "disputes"), {
+        orderId: order.id,
+        productName: order.productName,
+        reason,
+        description: description.trim(),
+        status: "open",
+        openedBy: currentUser.uid,
+        openedByName: userData?.name || "Usuario",
+        openedByRole: isBuyer ? "comprador" : "vendedor",
+        againstId: isBuyer ? order.sellerId : order.buyerId,
+        againstName: isBuyer ? order.sellerName : order.buyerName,
+        buyerId: order.buyerId,
+        buyerName: order.buyerName,
+        sellerId: order.sellerId,
+        sellerName: order.sellerName,
+        total: order.total,
+        createdAt: new Date().toISOString(),
+      });
+      showToast("Disputa abierta. Un administrador la revisará.");
+      setOpen(false);
+      setReason("");
+      setDescription("");
+    } catch (err) {
+      showToast("Error: " + err.message, "error");
+    }
+    setSending(false);
+  };
+
+  if (!open) {
+    return (
+      <button className="dispute-open-btn" onClick={() => setOpen(true)}>
+        <AlertTriangle size={14} /> Abrir disputa sobre este pedido
+      </button>
+    );
+  }
+
+  return (
+    <div className="dispute-form">
+      <h4><AlertTriangle size={16} /> Abrir Disputa</h4>
+      <select value={reason} onChange={(e) => setReason(e.target.value)} className="dispute-select">
+        <option value="">Selecciona el motivo...</option>
+        {DISPUTE_REASONS.map((r) => <option key={r} value={r}>{r}</option>)}
+      </select>
+      <textarea
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder="Describe el problema con detalle..."
+        rows={3}
+        className="dispute-textarea"
+      />
+      <div className="dispute-form-actions">
+        <button className="btn btn-sm btn-danger" onClick={handleSubmit} disabled={sending}>
+          <Send size={14} /> {sending ? "Enviando..." : "Enviar Disputa"}
+        </button>
+        <button className="btn btn-sm btn-outline" onClick={() => setOpen(false)}>Cancelar</button>
+      </div>
     </div>
   );
 }

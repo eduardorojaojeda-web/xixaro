@@ -183,6 +183,49 @@
   box-shadow: 0 8px 40px rgba(0,0,0,0.4);
 }
 
+/* Disputes */
+.disputes-list { display: flex; flex-direction: column; gap: 16px; }
+
+.dispute-card { padding: 22px; }
+.dispute-card:hover { transform: none; }
+
+.dispute-card-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 16px;
+}
+.dispute-card-top h4 {
+  font-family: "DM Sans", sans-serif;
+  font-size: 1rem; font-weight: 700; color: var(--tierra);
+  margin-bottom: 6px;
+}
+.dispute-date { font-size: 0.75rem; color: var(--tierra-400); }
+
+.dispute-card-body { margin-bottom: 16px; }
+
+.dispute-parties {
+  display: flex; gap: 32px; flex-wrap: wrap;
+  padding-bottom: 14px; margin-bottom: 14px;
+  border-bottom: 1px solid var(--tierra-200);
+}
+.dp-label {
+  display: block; font-size: 0.68rem; font-weight: 600;
+  color: var(--tierra-400); text-transform: uppercase; letter-spacing: 0.5px;
+}
+.dispute-parties strong { font-size: 0.9rem; color: var(--tierra); }
+.dp-role { font-size: 0.75rem; color: var(--tierra-400); margin-left: 4px; }
+
+.dispute-reason strong {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.88rem; font-weight: 700; color: var(--danger);
+  display: block; margin-bottom: 4px;
+}
+.dispute-reason p { font-size: 0.85rem; color: var(--tierra-600); line-height: 1.6; }
+
+.dispute-resolve-actions {
+  display: flex; gap: 10px; padding-top: 14px;
+  border-top: 1px solid var(--tierra-200);
+}
+
 .tab-badge {
   background: var(--naranja);
   color: var(--white);

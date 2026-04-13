@@ -49,6 +49,18 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Disputas: participantes y admin leen, autenticados crean, solo admin resuelve
+    match /disputes/{disputeId} {
+      allow read: if request.auth != null
+        && (resource.data.openedBy == request.auth.uid
+            || resource.data.againstId == request.auth.uid
+            || isAdmin());
+      allow create: if request.auth != null
+        && request.resource.data.openedBy == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
     // Resenas: publico lee, autenticados crean, nadie edita/borra
     match /reviews/{reviewId} {
       allow read: if true;

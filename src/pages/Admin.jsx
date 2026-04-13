@@ -13,7 +13,7 @@ import {
 } from "firebase/firestore";
 import {
   Shield, Users, Package, ShoppingCart, CheckCircle, XCircle,
-  Ban, Trash2, Eye, Clock, TrendingUp, CreditCard,
+  Ban, Trash2, Eye, Clock, TrendingUp, CreditCard, AlertTriangle,
 } from "lucide-react";
 import { useToast } from "../hooks/useToast";
 import "./Admin.css";
@@ -24,6 +24,7 @@ export default function Admin() {
   const [users, setUsers] = useState([]);
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [disputes, setDisputes] = useState([]);
   const { toast, showToast } = useToast();
 
   useEffect(() => {
@@ -43,7 +44,14 @@ export default function Admin() {
           .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""))
       );
     });
-    return () => { u1(); u2(); u3(); };
+    const u4 = onSnapshot(collection(db, "disputes"), (snap) => {
+      setDisputes(
+        snap.docs
+          .map((d) => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""))
+      );
+    });
+    return () => { u1(); u2(); u3(); u4(); };
   }, []);
 
   // Marcar notificaciones de admin como leidas al entrar
@@ -77,6 +85,7 @@ export default function Admin() {
     totalOrders: orders.length,
     ordersPending: orders.filter((o) => o.status === "pendiente").length,
     ordersDelivered: orders.filter((o) => o.status === "entregado").length,
+    openDisputes: disputes.filter((d) => d.status === "open").length,
   };
 
   const tabs = [
@@ -85,6 +94,7 @@ export default function Admin() {
     { id: "users", label: "Usuarios", icon: <Users size={16} /> },
     { id: "products", label: "Productos", icon: <Package size={16} /> },
     { id: "orders", label: "Pedidos", icon: <ShoppingCart size={16} /> },
+    { id: "disputes", label: "Disputas", icon: <AlertTriangle size={16} />, badge: stats.openDisputes },
   ];
 
   return (
@@ -112,6 +122,7 @@ export default function Admin() {
       {tab === "users" && <UsersPanel users={users} showToast={showToast} />}
       {tab === "products" && <ProductsPanel products={products} showToast={showToast} />}
       {tab === "orders" && <OrdersPanel orders={orders} />}
+      {tab === "disputes" && <DisputesPanel disputes={disputes} showToast={showToast} />}
 
       {toast && <div className={`toast ${toast.type}`}>{toast.message}</div>}
     </div>
@@ -130,6 +141,7 @@ function StatsPanel({ stats }) {
     { label: "Pendientes de revision", value: stats.pending, icon: <Clock size={24} />, color: "stat-yellow" },
     { label: "Pedidos totales", value: stats.totalOrders, icon: <ShoppingCart size={24} />, color: "stat-blue" },
     { label: "Pedidos entregados", value: stats.ordersDelivered, icon: <CheckCircle size={24} />, color: "stat-green" },
+    { label: "Disputas abiertas", value: stats.openDisputes, icon: <AlertTriangle size={24} />, color: "stat-red" },
   ];
 
   return (
@@ -487,6 +499,100 @@ function OrdersPanel({ orders }) {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Disputes ── */
+function DisputesPanel({ disputes, showToast }) {
+  const [filter, setFilter] = useState("open");
+
+  const filtered = filter === "all" ? disputes : disputes.filter((d) => d.status === filter);
+
+  const handleResolve = async (dispute, resolution) => {
+    try {
+      await updateDoc(doc(db, "disputes", dispute.id), {
+        status: resolution,
+        resolvedAt: new Date().toISOString(),
+      });
+      showToast(resolution === "resolved_buyer" ? "Resuelta a favor del comprador" : "Resuelta a favor del vendedor");
+    } catch (err) {
+      showToast("Error: " + err.message, "error");
+    }
+  };
+
+  return (
+    <div className="admin-panel">
+      <div className="admin-panel-top">
+        <h2>Disputas ({disputes.length})</h2>
+        <div className="mod-filters">
+          {[
+            { id: "open", label: "Abiertas" },
+            { id: "resolved_buyer", label: "Favor comprador" },
+            { id: "resolved_seller", label: "Favor vendedor" },
+            { id: "all", label: "Todas" },
+          ].map((f) => (
+            <button
+              key={f.id}
+              className={`filter-chip ${filter === f.id ? "active" : ""}`}
+              onClick={() => setFilter(f.id)}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {filtered.length === 0 ? (
+        <p className="admin-empty">No hay disputas con este filtro</p>
+      ) : (
+        <div className="disputes-list">
+          {filtered.map((d) => (
+            <div key={d.id} className="dispute-card card">
+              <div className="dispute-card-top">
+                <div>
+                  <h4>{d.productName}</h4>
+                  <span className={`mod-status mod-${d.status === "open" ? "pending" : "approved"}`}>
+                    {d.status === "open" ? "Abierta" : d.status === "resolved_buyer" ? "Favor comprador" : "Favor vendedor"}
+                  </span>
+                </div>
+                <span className="dispute-date">{new Date(d.createdAt).toLocaleDateString("es-MX")}</span>
+              </div>
+              <div className="dispute-card-body">
+                <div className="dispute-parties">
+                  <div>
+                    <span className="dp-label">Abierta por</span>
+                    <strong>{d.openedByName}</strong>
+                    <span className="dp-role">({d.openedByRole})</span>
+                  </div>
+                  <div>
+                    <span className="dp-label">Contra</span>
+                    <strong>{d.againstName}</strong>
+                  </div>
+                  <div>
+                    <span className="dp-label">Monto</span>
+                    <strong>${Number(d.total).toLocaleString("es-MX")}</strong>
+                  </div>
+                </div>
+                <div className="dispute-reason">
+                  <strong>{d.reason}</strong>
+                  <p>{d.description}</p>
+                </div>
+              </div>
+              {d.status === "open" && (
+                <div className="dispute-resolve-actions">
+                  <button className="btn btn-sm btn-primary" onClick={() => handleResolve(d, "resolved_buyer")}>
+                    <CheckCircle size={14} /> Favor del comprador
+                  </button>
+                  <button className="btn btn-sm btn-orange" onClick={() => handleResolve(d, "resolved_seller")}>
+                    <CheckCircle size={14} /> Favor del vendedor
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>
