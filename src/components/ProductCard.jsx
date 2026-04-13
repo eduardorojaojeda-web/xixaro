@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { MessageCircle, User } from "lucide-react";
+import { MessageCircle, User, ShoppingCart } from "lucide-react";
 import { ProductPlaceholder } from "./Icons";
 import "./ProductCard.css";
 
-export default function ProductCard({ product, onContact }) {
+export default function ProductCard({ product, onContact, showOrder }) {
   return (
     <div className="product-card card">
       <div className="product-img-wrap">
@@ -35,11 +35,13 @@ export default function ProductCard({ product, onContact }) {
           {product.sellerName}
         </Link>
         <div className="product-actions">
-          <Link to={`/perfil/${product.sellerId}`} className="btn btn-sm btn-outline">
-            Ver Vendedor
-          </Link>
+          {showOrder && (
+            <Link to={`/pedido/${product.id}`} className="btn btn-sm btn-primary">
+              <ShoppingCart size={14} /> Hacer Pedido
+            </Link>
+          )}
           {onContact && (
-            <button className="btn btn-sm btn-primary" onClick={() => onContact(product)}>
+            <button className="btn btn-sm btn-outline" onClick={() => onContact(product)}>
               <MessageCircle size={14} /> Contactar
             </button>
           )}

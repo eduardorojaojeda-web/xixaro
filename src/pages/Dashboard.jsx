@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { db, rtdb } from "../firebase";
+import { db, rtdb, storage } from "../firebase";
+import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { ref as rtdbRef, get as rtdbGet, push as rtdbPush } from "firebase/database";
 import {
   collection,
@@ -117,66 +118,26 @@ export default function Dashboard() {
     return () => clearTimeout(timer);
   }, [form.name]);
 
-  const MAX_SIZE = 400_000; // 400KB
-
-  const compressImage = (file) =>
-    new Promise((resolve) => {
-      const img = new window.Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let { width, height } = img;
-
-        // Scale down if larger than 1200px on any side
-        const MAX_DIM = 1200;
-        if (width > MAX_DIM || height > MAX_DIM) {
-          const ratio = Math.min(MAX_DIM / width, MAX_DIM / height);
-          width = Math.round(width * ratio);
-          height = Math.round(height * ratio);
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Try progressively lower quality until under MAX_SIZE
-        let quality = 0.8;
-        let result = canvas.toDataURL("image/jpeg", quality);
-        while (result.length > MAX_SIZE && quality > 0.1) {
-          quality -= 0.1;
-          result = canvas.toDataURL("image/jpeg", quality);
-        }
-
-        resolve(result);
-      };
-      img.src = URL.createObjectURL(file);
-    });
+  const MAX_FILE_SIZE = 5_000_000; // 5MB
 
   const formatSize = (bytes) => {
     if (bytes < 1024) return `${bytes} B`;
-    return `${(bytes / 1024).toFixed(0)} KB`;
+    if (bytes < 1_000_000) return `${(bytes / 1024).toFixed(0)} KB`;
+    return `${(bytes / 1_000_000).toFixed(1)} MB`;
   };
 
-  const handleImage = async (e) => {
+  const handleImage = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    setImageSize({ original: file.size, compressed: null });
-    setImagePreview(URL.createObjectURL(file));
-
-    const compressed = await compressImage(file);
-    const compressedBytes = Math.round(compressed.length * 0.75); // base64 overhead
-
-    if (compressedBytes > MAX_SIZE) {
-      showToast(`Imagen demasiado grande (${formatSize(compressedBytes)}). Usa una foto más pequeña.`, "error");
-      setImageFile(null);
-      setImagePreview(null);
-      setImageSize(null);
+    if (file.size > MAX_FILE_SIZE) {
+      showToast(`La imagen pesa ${formatSize(file.size)}. Máximo permitido: 5 MB.`, "error");
       return;
     }
 
-    setImageFile(compressed);
-    setImageSize({ original: file.size, compressed: compressedBytes });
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+    setImageSize(file.size);
   };
 
   const resetForm = () => {
@@ -186,6 +147,7 @@ export default function Dashboard() {
     setImageSize(null);
     setLocation(null);
     setEditingId(null);
+    setErrors({});
   };
 
   const handleEdit = (product) => {
@@ -197,9 +159,9 @@ export default function Dashboard() {
       unit: product.unit || "kg",
       category: product.category || "verduras",
     });
-    setImageFile(product.imageUrl || null);
+    setImageFile(product.imageUrl || null); // URL string de Storage
     setImagePreview(product.imageUrl || null);
-    setImageSize(null);
+    setImageSize(null); // No mostramos tamaño para fotos existentes
     setLocation(product.lat ? { lat: product.lat, lng: product.lng } : null);
     setEditingId(product.id);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -211,7 +173,19 @@ export default function Dashboard() {
     setLoading(true);
 
     try {
-      const imageUrl = imageFile || "";
+      // Subir imagen a Firebase Storage si hay un archivo nuevo
+      let imageUrl = "";
+      if (imageFile && imageFile instanceof File) {
+        const imgRef = storageRef(
+          storage,
+          `products/${currentUser.uid}/${Date.now()}_${imageFile.name}`
+        );
+        await uploadBytes(imgRef, imageFile);
+        imageUrl = await getDownloadURL(imgRef);
+      } else if (typeof imageFile === "string" && imageFile.startsWith("http")) {
+        // Foto existente de una edicion (ya es URL de Storage)
+        imageUrl = imageFile;
+      }
 
       const productData = {
         name: form.name,
@@ -418,12 +392,7 @@ export default function Dashboard() {
               </div>
               {imageSize && (
                 <div className="image-size-info">
-                  <span>Original: {formatSize(imageSize.original)}</span>
-                  {imageSize.compressed && (
-                    <span className="compressed-ok">
-                      → Comprimida: {formatSize(imageSize.compressed)} ✓
-                    </span>
-                  )}
+                  <span>{formatSize(imageSize)} — se subirá a Firebase Storage</span>
                 </div>
               )}
             </div>

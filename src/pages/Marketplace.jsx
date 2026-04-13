@@ -169,6 +169,7 @@ export default function Marketplace() {
             <ProductCard
               key={p.id}
               product={p}
+              showOrder={currentUser && currentUser.uid !== p.sellerId}
               onContact={
                 currentUser?.uid !== p.sellerId ? handleContact : undefined
               }

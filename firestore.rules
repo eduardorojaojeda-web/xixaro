@@ -29,6 +29,19 @@ service cloud.firestore {
         && resource.data.sellerId == request.auth.uid;
     }
 
+    // Pedidos: comprador y vendedor involucrados pueden leer
+    // Solo compradores pueden crear, solo vendedores pueden actualizar el estado
+    match /orders/{orderId} {
+      allow read: if request.auth != null
+        && (resource.data.buyerId == request.auth.uid || resource.data.sellerId == request.auth.uid);
+      allow create: if request.auth != null
+        && request.resource.data.buyerId == request.auth.uid
+        && request.resource.data.quantity > 0;
+      allow update: if request.auth != null
+        && resource.data.sellerId == request.auth.uid;
+      allow delete: if false;
+    }
+
     // Resenas: autenticados pueden leer y crear, nadie puede editar ni borrar
     match /reviews/{reviewId} {
       allow read: if true;

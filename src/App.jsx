@@ -10,6 +10,8 @@ import Profile from "./pages/Profile";
 import Chat from "./pages/Chat";
 import ChatList from "./pages/ChatList";
 import Alerts from "./pages/Alerts";
+import NewOrder from "./pages/NewOrder";
+import Orders from "./pages/Orders";
 import NotFound from "./pages/NotFound";
 
 function ProtectedRoute({ children, requiredRole }) {
@@ -42,6 +44,22 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <Chat />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pedido/:productId"
+          element={
+            <ProtectedRoute>
+              <NewOrder />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pedidos"
+          element={
+            <ProtectedRoute>
+              <Orders />
             </ProtectedRoute>
           }
         />

@@ -3,7 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { signOut } from "firebase/auth";
 import { auth, rtdb } from "../firebase";
 import { ref, onValue } from "firebase/database";
-import { Menu, X, ShoppingBag, User, LogOut, MessageCircle, Bell, LayoutDashboard } from "lucide-react";
+import { Menu, X, ShoppingBag, User, LogOut, MessageCircle, Bell, LayoutDashboard, Package } from "lucide-react";
 import { LeafLogo } from "./Icons";
 import { useState, useEffect } from "react";
 import "./Navbar.css";
@@ -95,6 +95,9 @@ export default function Navbar() {
                   <LayoutDashboard size={18} /> Mi Panel
                 </Link>
               )}
+              <Link to="/pedidos" onClick={() => setMenuOpen(false)}>
+                <Package size={18} /> Pedidos
+              </Link>
               <Link to="/chats" onClick={() => setMenuOpen(false)} className="messages-link">
                 <MessageCircle size={18} /> Mensajes
                 {unreadCount > 0 && (
