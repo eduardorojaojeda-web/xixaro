@@ -26,6 +26,10 @@ export default function NewOrder() {
       const snap = await getDoc(doc(db, "products", productId));
       if (snap.exists()) {
         const data = { id: snap.id, ...snap.data() };
+        if (data.moderationStatus === "pending" || data.moderationStatus === "rejected") {
+          navigate("/marketplace");
+          return;
+        }
         setProduct(data);
         setUnit(data.unit || "tonelada");
       } else {

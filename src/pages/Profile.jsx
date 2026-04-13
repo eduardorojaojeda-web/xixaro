@@ -299,15 +299,19 @@ export default function Profile() {
         </div>
       )}
 
-      {/* Products */}
-      {profile.role === "vendedor" && (
+      {/* Products — solo aprobados en perfil publico, todos en perfil propio */}
+      {profile.role === "vendedor" && (() => {
+        const visibleProducts = isOwnProfile
+          ? products
+          : products.filter((p) => !p.moderationStatus || p.moderationStatus === "approved");
+        return (
         <section className="profile-section">
-          <h2>Productos de {profile.name} ({products.length})</h2>
-          {products.length === 0 ? (
+          <h2>Productos de {profile.name} ({visibleProducts.length})</h2>
+          {visibleProducts.length === 0 ? (
             <p className="section-empty">Este vendedor aún no tiene productos.</p>
           ) : (
             <div className="mp-grid">
-              {products.map((p) => (
+              {visibleProducts.map((p) => (
                 <ProductCard
                   key={p.id}
                   product={p}
@@ -322,7 +326,8 @@ export default function Profile() {
             </div>
           )}
         </section>
-      )}
+        );
+      })()}
 
       {/* Alerts for buyers on own profile */}
       {isComprador && (
