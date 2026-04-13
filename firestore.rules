@@ -2,23 +2,42 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Users: anyone authenticated can read, only owner can write their own doc
+    // Usuarios: solo el propio usuario puede leer y editar su perfil
+    // Otros usuarios autenticados pueden leer perfiles (necesario para ver vendedores)
     match /users/{userId} {
       allow read: if request.auth != null;
-      allow create, update: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false;
     }
 
-    // Products: anyone can read, authenticated users can create, only owner can update/delete
+    // Productos: cualquiera puede leer, solo el dueno puede crear/editar/borrar
     match /products/{productId} {
       allow read: if true;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && request.auth.uid == resource.data.sellerId;
+      allow create: if request.auth != null
+        && request.resource.data.sellerId == request.auth.uid
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 3
+        && request.resource.data.name.size() <= 100
+        && request.resource.data.price is number
+        && request.resource.data.price > 0
+        && request.resource.data.quantity is number
+        && request.resource.data.quantity > 0;
+      allow update: if request.auth != null
+        && resource.data.sellerId == request.auth.uid;
+      allow delete: if request.auth != null
+        && resource.data.sellerId == request.auth.uid;
     }
 
-    // Reviews: anyone can read, authenticated users can create
+    // Resenas: autenticados pueden leer y crear, nadie puede editar ni borrar
     match /reviews/{reviewId} {
       allow read: if true;
-      allow create: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.rating is number
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5;
+      allow update, delete: if false;
     }
   }
 }

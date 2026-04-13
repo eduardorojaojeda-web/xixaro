@@ -12,6 +12,7 @@ export default function Chat() {
   const { currentUser, userData } = useAuth();
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
+  const [cooldown, setCooldown] = useState(false);
   const messagesEndRef = useRef(null);
 
   const otherUserId = location.state?.otherUserId
@@ -49,9 +50,14 @@ export default function Chat() {
   const handleSend = async (e) => {
     e.preventDefault();
     if (!text.trim()) return;
+    if (cooldown) return;
 
     const messageText = text.trim();
     setText("");
+
+    // Rate limit: 1 mensaje cada 2 segundos
+    setCooldown(true);
+    setTimeout(() => setCooldown(false), 2000);
 
     // Push message
     push(ref(rtdb, `chats/${chatId}/messages`), {
@@ -131,15 +137,18 @@ export default function Chat() {
         <div ref={messagesEndRef} />
       </div>
 
+      {cooldown && (
+        <div className="chat-cooldown">Espera un momento antes de enviar otro mensaje</div>
+      )}
       <form className="chat-input" onSubmit={handleSend}>
         <input
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Escribe un mensaje..."
+          placeholder={cooldown ? "Espera un momento..." : "Escribe un mensaje..."}
           autoFocus
         />
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className="btn btn-primary" disabled={cooldown}>
           <Send size={18} />
         </button>
       </form>

@@ -61,6 +61,18 @@
   color: var(--tierra);
 }
 
+.input-error {
+  border-color: var(--danger) !important;
+}
+
+.field-error {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--danger);
+}
+
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;

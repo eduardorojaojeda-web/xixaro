@@ -48,7 +48,29 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [avgPrice, setAvgPrice] = useState(null);
   const [editingId, setEditingId] = useState(null);
+  const [errors, setErrors] = useState({});
   const { toast, showToast } = useToast();
+
+  const validateForm = () => {
+    const errs = {};
+    const name = form.name.trim();
+    const desc = form.description.trim();
+    const price = Number(form.price);
+    const qty = Number(form.quantity);
+
+    if (name.length < 3) errs.name = "Mínimo 3 caracteres";
+    else if (name.length > 100) errs.name = "Máximo 100 caracteres";
+
+    if (desc.length < 10) errs.description = "Mínimo 10 caracteres";
+    else if (desc.length > 500) errs.description = "Máximo 500 caracteres";
+
+    if (!price || price <= 0) errs.price = "Ingresa un precio válido mayor a 0";
+
+    if (!qty || qty <= 0) errs.quantity = "Ingresa una cantidad válida mayor a 0";
+
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
 
   useEffect(() => {
     if (!currentUser) return;
@@ -185,6 +207,7 @@ export default function Dashboard() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
     setLoading(true);
 
     try {
@@ -283,20 +306,22 @@ export default function Dashboard() {
               <input
                 type="text"
                 value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                onChange={(e) => { setForm({ ...form, name: e.target.value }); setErrors({ ...errors, name: undefined }); }}
                 placeholder="Ej: Chile Habanero, Aguacate Hass..."
-                required
+                className={errors.name ? "input-error" : ""}
               />
+              {errors.name && <span className="field-error">{errors.name}</span>}
             </div>
 
             <div className="input-group">
               <label>Descripción</label>
               <textarea
                 value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                onChange={(e) => { setForm({ ...form, description: e.target.value }); setErrors({ ...errors, description: undefined }); }}
                 placeholder="Describe tu producto: origen, frescura, tipo..."
-                required
+                className={errors.description ? "input-error" : ""}
               />
+              {errors.description && <span className="field-error">{errors.description}</span>}
             </div>
 
             <div className="input-group">
@@ -323,10 +348,12 @@ export default function Dashboard() {
                   onChange={(e) => {
                     const raw = e.target.value.replace(/[^0-9.]/g, "");
                     setForm({ ...form, price: raw });
+                    setErrors({ ...errors, price: undefined });
                   }}
                   placeholder="0"
-                  required
+                  className={errors.price ? "input-error" : ""}
                 />
+                {errors.price && <span className="field-error">{errors.price}</span>}
                 {Number(form.price) > 0 && (
                   <div className="price-equivalences">
                     <span>= <strong>${(Number(form.price) / 1000).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> por kg</span>
@@ -349,10 +376,11 @@ export default function Dashboard() {
                   min="0"
                   step="0.01"
                   value={form.quantity}
-                  onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+                  onChange={(e) => { setForm({ ...form, quantity: e.target.value }); setErrors({ ...errors, quantity: undefined }); }}
                   placeholder="0"
-                  required
+                  className={errors.quantity ? "input-error" : ""}
                 />
+                {errors.quantity && <span className="field-error">{errors.quantity}</span>}
               </div>
 
               <div className="input-group">

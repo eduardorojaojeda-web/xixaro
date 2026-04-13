@@ -3,14 +3,17 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getDatabase } from "firebase/database";
 
+// Las credenciales se leen desde el archivo .env
+// En desarrollo: crea un archivo .env con las variables VITE_FIREBASE_*
+// En produccion (Netlify): configura las variables en el panel de Netlify
 const firebaseConfig = {
-  apiKey: "AIzaSyDrN0RnoCkNue7l2PlWHTslCd2Xot2wUHs",
-  authDomain: "dikati-94597.firebaseapp.com",
-  databaseURL: "https://dikati-94597-default-rtdb.firebaseio.com",
-  projectId: "dikati-94597",
-  storageBucket: "dikati-94597.firebasestorage.app",
-  messagingSenderId: "607866287683",
-  appId: "1:607866287683:web:b9b779e0d8a70a480686f6",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);
