@@ -250,6 +250,21 @@
   vertical-align: middle;
 }
 
+.stock-badge-pending {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 50px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: #fef3c7;
+  color: #92400e;
+  font-family: "DM Sans", sans-serif;
+  vertical-align: middle;
+}
+
 .stock-clickable {
   cursor: pointer;
   display: inline-flex;

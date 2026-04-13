@@ -2,16 +2,22 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Usuarios: solo el propio usuario puede leer y editar su perfil
-    // Otros usuarios autenticados pueden leer perfiles (necesario para ver vendedores)
+    // Funcion helper: verificar si el usuario es admin
+    function isAdmin() {
+      return request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+    }
+
+    // Usuarios: autenticados leen, dueño edita, admin puede todo
     match /users/{userId} {
       allow read: if request.auth != null;
       allow create: if request.auth != null && request.auth.uid == userId;
-      allow update: if request.auth != null && request.auth.uid == userId;
-      allow delete: if false;
+      allow update: if request.auth != null
+        && (request.auth.uid == userId || isAdmin());
+      allow delete: if isAdmin();
     }
 
-    // Productos: cualquiera puede leer, solo el dueno puede crear/editar/borrar
+    // Productos: publico lee (solo aprobados en el cliente), dueño crea/edita/borra, admin modera
     match /products/{productId} {
       allow read: if true;
       allow create: if request.auth != null
@@ -24,25 +30,26 @@ service cloud.firestore {
         && request.resource.data.quantity is number
         && request.resource.data.quantity > 0;
       allow update: if request.auth != null
-        && resource.data.sellerId == request.auth.uid;
+        && (resource.data.sellerId == request.auth.uid || isAdmin());
       allow delete: if request.auth != null
-        && resource.data.sellerId == request.auth.uid;
+        && (resource.data.sellerId == request.auth.uid || isAdmin());
     }
 
-    // Pedidos: comprador y vendedor involucrados pueden leer
-    // Solo compradores pueden crear, solo vendedores pueden actualizar el estado
+    // Pedidos: participantes leen, comprador crea, vendedor actualiza, admin lee todo
     match /orders/{orderId} {
       allow read: if request.auth != null
-        && (resource.data.buyerId == request.auth.uid || resource.data.sellerId == request.auth.uid);
+        && (resource.data.buyerId == request.auth.uid
+            || resource.data.sellerId == request.auth.uid
+            || isAdmin());
       allow create: if request.auth != null
         && request.resource.data.buyerId == request.auth.uid
         && request.resource.data.quantity > 0;
       allow update: if request.auth != null
-        && resource.data.sellerId == request.auth.uid;
+        && (resource.data.sellerId == request.auth.uid || isAdmin());
       allow delete: if false;
     }
 
-    // Resenas: autenticados pueden leer y crear, nadie puede editar ni borrar
+    // Resenas: publico lee, autenticados crean, nadie edita/borra
     match /reviews/{reviewId} {
       allow read: if true;
       allow create: if request.auth != null

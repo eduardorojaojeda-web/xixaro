@@ -64,6 +64,7 @@ export default function Marketplace() {
   };
 
   const filtered = products
+    .filter((p) => !p.moderationStatus || p.moderationStatus === "approved")
     .filter(
       (p) =>
         p.name.toLowerCase().includes(search.toLowerCase()) ||

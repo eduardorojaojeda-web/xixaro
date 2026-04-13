@@ -3,7 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { signOut } from "firebase/auth";
 import { auth, rtdb } from "../firebase";
 import { ref, onValue } from "firebase/database";
-import { Menu, X, ShoppingBag, User, LogOut, MessageCircle, Bell, LayoutDashboard, Package } from "lucide-react";
+import { Menu, X, ShoppingBag, User, LogOut, MessageCircle, Bell, LayoutDashboard, Package, Shield } from "lucide-react";
 import { LeafLogo } from "./Icons";
 import { useState, useEffect } from "react";
 import "./Navbar.css";
@@ -116,6 +116,11 @@ export default function Navbar() {
 
           {currentUser ? (
             <>
+              {userData?.role === "admin" && (
+                <Link to="/admin" onClick={() => setMenuOpen(false)}>
+                  <Shield size={18} /> Admin
+                </Link>
+              )}
               {userData?.role === "vendedor" && (
                 <Link to="/dashboard" onClick={() => setMenuOpen(false)}>
                   <LayoutDashboard size={18} /> Mi Panel

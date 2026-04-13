@@ -12,6 +12,7 @@ import ChatList from "./pages/ChatList";
 import Alerts from "./pages/Alerts";
 import NewOrder from "./pages/NewOrder";
 import Orders from "./pages/Orders";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 function ProtectedRoute({ children, requiredRole }) {
@@ -76,6 +77,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <ChatList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <Admin />
             </ProtectedRoute>
           }
         />

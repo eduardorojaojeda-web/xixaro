@@ -231,6 +231,7 @@ export default function Dashboard() {
         showToast("Producto actualizado");
       } else {
         productData.createdAt = new Date().toISOString();
+        productData.moderationStatus = "pending";
         await addDoc(collection(db, "products"), productData);
 
         // Send alerts to buyers watching this category
@@ -500,6 +501,12 @@ export default function Dashboard() {
                       {p.name}
                       {Number(p.quantity) <= 0 && (
                         <span className="stock-badge-sold-out"><AlertTriangle size={12} /> Agotado</span>
+                      )}
+                      {p.moderationStatus === "pending" && (
+                        <span className="stock-badge-pending">En revision</span>
+                      )}
+                      {p.moderationStatus === "rejected" && (
+                        <span className="stock-badge-sold-out">Rechazado</span>
                       )}
                     </h4>
                     <p className="my-product-price">
