@@ -50,14 +50,13 @@ export default function Home() {
             <span>Xixaro</span>
           </div>
           <h1 className="hero-title">
-            Del surco a la empresa,
+            Conectamos productores y empresas.
             <br />
-            <span className="hero-accent">sin quien encarezca</span>
+            <span className="hero-accent">Sin perder en el camino.</span>
           </h1>
           <p className="hero-sub">
-            Xixaro conecta productores agrícolas de México con restaurantes,
-            supermercados, distribuidoras y exportadoras. Volúmenes comerciales,
-            precios directos, sin intermediarios en la cadena.
+            Accede a volúmenes comerciales, mejores precios y suministro confiable
+            con una cadena de valor más eficiente y transparente.
           </p>
           <div className="hero-actions">
             <Link to="/registro" className="btn btn-hero-primary">
