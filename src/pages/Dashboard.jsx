@@ -303,8 +303,39 @@ export default function Dashboard() {
         <p>Publica y administra tus productos del campo</p>
       </div>
 
+      {userData && !userData.verified && userData.verificationStatus && (
+        <div className="verification-banner">
+          {userData.verificationStatus === "pending" && (
+            <>
+              <span className="vb-icon">🕐</span>
+              <div>
+                <strong>Tu identidad está en revisión</strong>
+                <p>Un administrador revisará tu INE. Podrás publicar productos una vez verificado.</p>
+              </div>
+            </>
+          )}
+          {userData.verificationStatus === "rejected" && (
+            <>
+              <span className="vb-icon">⚠️</span>
+              <div>
+                <strong>Verificación rechazada</strong>
+                <p>Tu identificación no pudo ser verificada. Contacta a soporte para más información.</p>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
       <div className="dash-grid">
         <div className="dash-form-wrap">
+          {userData && !userData.verified && userData.verificationStatus ? (
+            <div className="dash-blocked">
+              <CameraIcon size={48} />
+              <h3>Verificación requerida</h3>
+              <p>Para publicar productos necesitas que un administrador apruebe tu identidad. Este proceso toma entre 1 y 24 horas.</p>
+            </div>
+          ) : (
+          <>
           <div className="dash-form-header">
             <h2>{editingId ? "Editar Producto" : "Publicar Producto"}</h2>
             {editingId && (
@@ -494,6 +525,8 @@ export default function Dashboard() {
               }
             </button>
           </form>
+          </>
+          )}
         </div>
 
         <div className="dash-products">

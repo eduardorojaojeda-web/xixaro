@@ -13,7 +13,7 @@ import {
 } from "firebase/firestore";
 import {
   Shield, Users, Package, ShoppingCart, CheckCircle, XCircle,
-  Ban, Trash2, Eye, Clock, TrendingUp,
+  Ban, Trash2, Eye, Clock, TrendingUp, CreditCard,
 } from "lucide-react";
 import { useToast } from "../hooks/useToast";
 import "./Admin.css";
@@ -69,6 +69,7 @@ export default function Admin() {
     vendedores: users.filter((u) => u.role === "vendedor").length,
     compradores: users.filter((u) => u.role === "comprador").length,
     suspended: users.filter((u) => u.suspended).length,
+    pendingVerification: users.filter((u) => u.verificationStatus === "pending").length,
     totalProducts: products.length,
     pending: products.filter((p) => p.moderationStatus === "pending").length,
     approved: products.filter((p) => !p.moderationStatus || p.moderationStatus === "approved").length,
@@ -80,6 +81,7 @@ export default function Admin() {
 
   const tabs = [
     { id: "stats", label: "Estadisticas", icon: <TrendingUp size={16} /> },
+    { id: "verification", label: "Verificaciones", icon: <CreditCard size={16} />, badge: stats.pendingVerification },
     { id: "users", label: "Usuarios", icon: <Users size={16} /> },
     { id: "products", label: "Productos", icon: <Package size={16} /> },
     { id: "orders", label: "Pedidos", icon: <ShoppingCart size={16} /> },
@@ -100,11 +102,13 @@ export default function Admin() {
             onClick={() => setTab(t.id)}
           >
             {t.icon} {t.label}
+            {t.badge > 0 && <span className="tab-badge">{t.badge}</span>}
           </button>
         ))}
       </div>
 
       {tab === "stats" && <StatsPanel stats={stats} />}
+      {tab === "verification" && <VerificationPanel users={users} showToast={showToast} />}
       {tab === "users" && <UsersPanel users={users} showToast={showToast} />}
       {tab === "products" && <ProductsPanel products={products} showToast={showToast} />}
       {tab === "orders" && <OrdersPanel orders={orders} />}
@@ -121,6 +125,7 @@ function StatsPanel({ stats }) {
     { label: "Productores", value: stats.vendedores, icon: <Package size={24} />, color: "stat-green" },
     { label: "Compradores", value: stats.compradores, icon: <ShoppingCart size={24} />, color: "stat-orange" },
     { label: "Suspendidos", value: stats.suspended, icon: <Ban size={24} />, color: "stat-red" },
+    { label: "Verificaciones pendientes", value: stats.pendingVerification, icon: <CreditCard size={24} />, color: "stat-yellow" },
     { label: "Productos totales", value: stats.totalProducts, icon: <Package size={24} />, color: "stat-green" },
     { label: "Pendientes de revision", value: stats.pending, icon: <Clock size={24} />, color: "stat-yellow" },
     { label: "Pedidos totales", value: stats.totalOrders, icon: <ShoppingCart size={24} />, color: "stat-blue" },
@@ -136,6 +141,107 @@ function StatsPanel({ stats }) {
           <div className="stat-card-label">{c.label}</div>
         </div>
       ))}
+    </div>
+  );
+}
+
+/* ── Verification ── */
+function VerificationPanel({ users, showToast }) {
+  const [filter, setFilter] = useState("pending");
+  const [viewingIne, setViewingIne] = useState(null);
+
+  const vendedores = users.filter((u) => u.role === "vendedor" && u.verificationStatus);
+  const filtered = filter === "all"
+    ? vendedores
+    : vendedores.filter((u) => u.verificationStatus === filter);
+
+  const handleVerify = async (user, status) => {
+    try {
+      await updateDoc(doc(db, "users", user.id), {
+        verificationStatus: status,
+        verified: status === "approved",
+        verifiedAt: new Date().toISOString(),
+      });
+      showToast(status === "approved" ? `${user.name} verificado` : `${user.name} rechazado`);
+    } catch (err) {
+      showToast("Error: " + err.message, "error");
+    }
+  };
+
+  return (
+    <div className="admin-panel">
+      <div className="admin-panel-top">
+        <h2>Verificación de Productores</h2>
+        <div className="mod-filters">
+          {[
+            { id: "pending", label: "Pendientes" },
+            { id: "approved", label: "Aprobados" },
+            { id: "rejected", label: "Rechazados" },
+            { id: "all", label: "Todos" },
+          ].map((f) => (
+            <button
+              key={f.id}
+              className={`filter-chip ${filter === f.id ? "active" : ""}`}
+              onClick={() => setFilter(f.id)}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {filtered.length === 0 ? (
+        <p className="admin-empty">No hay verificaciones con este filtro</p>
+      ) : (
+        <div className="verif-grid">
+          {filtered.map((u) => (
+            <div key={u.id} className="verif-card card">
+              <div className="verif-card-top">
+                <div>
+                  <h4>{u.name}</h4>
+                  <p className="verif-email">{u.email}</p>
+                  <p className="verif-date">Registro: {new Date(u.createdAt).toLocaleDateString("es-MX")}</p>
+                </div>
+                <span className={`mod-status mod-${u.verificationStatus}`}>
+                  {u.verificationStatus === "pending" && "Pendiente"}
+                  {u.verificationStatus === "approved" && "Verificado"}
+                  {u.verificationStatus === "rejected" && "Rechazado"}
+                </span>
+              </div>
+
+              {u.inePhoto && (
+                <div className="verif-ine">
+                  <img
+                    src={u.inePhoto}
+                    alt="INE"
+                    className="verif-ine-thumb"
+                    onClick={() => setViewingIne(u.inePhoto)}
+                  />
+                  <span className="verif-ine-label">Clic para ver en grande</span>
+                </div>
+              )}
+
+              {u.verificationStatus === "pending" && (
+                <div className="mod-actions">
+                  <button className="btn btn-sm btn-primary" onClick={() => handleVerify(u, "approved")}>
+                    <CheckCircle size={14} /> Aprobar
+                  </button>
+                  <button className="btn btn-sm btn-danger" onClick={() => handleVerify(u, "rejected")}>
+                    <XCircle size={14} /> Rechazar
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Lightbox para ver INE en grande */}
+      {viewingIne && (
+        <div className="ine-lightbox" onClick={() => setViewingIne(null)}>
+          <img src={viewingIne} alt="INE completa" />
+        </div>
+      )}
     </div>
   );
 }

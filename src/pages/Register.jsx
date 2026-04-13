@@ -5,7 +5,7 @@ import { doc, setDoc, collection, getDocs, query, where } from "firebase/firesto
 import { auth, db, rtdb } from "../firebase";
 import { ref as rtdbRef, push as rtdbPush } from "firebase/database";
 import { useAuth } from "../contexts/AuthContext";
-import { UserPlus, Sprout, Building2 } from "lucide-react";
+import { UserPlus, Sprout, Building2, CreditCard } from "lucide-react";
 import { useToast } from "../hooks/useToast";
 import "./Auth.css";
 
@@ -14,6 +14,8 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
+  const [inePhoto, setInePhoto] = useState(null);
+  const [inePreview, setInePreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const { toast, showToast } = useToast();
   const { setUserData } = useAuth();
@@ -25,6 +27,10 @@ export default function Register() {
       showToast("Selecciona un rol", "error");
       return;
     }
+    if (role === "vendedor" && !inePhoto) {
+      showToast("Sube una foto de tu identificación oficial (INE)", "error");
+      return;
+    }
     setLoading(true);
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
@@ -34,6 +40,11 @@ export default function Register() {
         role,
         createdAt: new Date().toISOString(),
         photoURL: "",
+        ...(role === "vendedor" && {
+          verified: false,
+          verificationStatus: "pending",
+          inePhoto: inePhoto,
+        }),
       };
       await setDoc(doc(db, "users", cred.user.uid), userData);
       setUserData({ id: cred.user.uid, ...userData });
@@ -132,6 +143,52 @@ export default function Register() {
               </button>
             </div>
           </div>
+
+          {role === "vendedor" && (
+            <div className="input-group">
+              <label><CreditCard size={14} /> Identificación oficial (INE)</label>
+              <p className="ine-hint">
+                Sube una foto legible de tu INE por ambos lados. Será revisada por un administrador para verificar tu identidad.
+              </p>
+              <div className="ine-upload">
+                {inePreview ? (
+                  <img src={inePreview} alt="INE preview" className="ine-preview" />
+                ) : (
+                  <div className="ine-placeholder">
+                    <CreditCard size={28} />
+                    <span>Subir foto de INE</span>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="file-input"
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    setInePreview(URL.createObjectURL(file));
+                    // Comprimir a base64
+                    const canvas = document.createElement("canvas");
+                    const img = new window.Image();
+                    img.onload = () => {
+                      let w = img.width, h = img.height;
+                      const MAX = 1400;
+                      if (w > MAX || h > MAX) {
+                        const r = Math.min(MAX / w, MAX / h);
+                        w = Math.round(w * r);
+                        h = Math.round(h * r);
+                      }
+                      canvas.width = w;
+                      canvas.height = h;
+                      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+                      setInePhoto(canvas.toDataURL("image/jpeg", 0.6));
+                    };
+                    img.src = URL.createObjectURL(file);
+                  }}
+                />
+              </div>
+            </div>
+          )}
 
           <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
             <UserPlus size={18} />

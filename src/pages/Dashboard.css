@@ -1,5 +1,38 @@
 .dashboard { padding: 36px 20px; }
 
+.verification-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 24px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 24px;
+  border: 1px solid #fbbf24;
+  background: #fef3c7;
+}
+.verification-banner .vb-icon { font-size: 2rem; flex-shrink: 0; }
+.verification-banner strong { display: block; font-size: 0.92rem; color: #92400e; }
+.verification-banner p { font-size: 0.82rem; color: #a16207; margin-top: 2px; }
+
+.dash-blocked {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--tierra-400);
+}
+.dash-blocked h3 {
+  font-family: "DM Sans", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--tierra);
+  margin: 16px 0 8px;
+}
+.dash-blocked p {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
 .dash-header { margin-bottom: 32px; }
 .dash-header h1 {
   display: flex;

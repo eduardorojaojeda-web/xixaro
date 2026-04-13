@@ -103,6 +103,48 @@
 }
 .auth-footer a:hover { text-decoration: underline; }
 
+.ine-hint {
+  font-size: 0.78rem;
+  color: var(--tierra-400);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.ine-upload {
+  position: relative;
+  border: 2px dashed var(--tierra-300);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.ine-upload:hover { border-color: var(--verde-hoja); }
+
+.ine-preview {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.ine-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 120px;
+  color: var(--tierra-400);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.ine-upload .file-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
 .auth-legal {
   text-align: center;
   margin-top: 12px;
