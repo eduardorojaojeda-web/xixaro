@@ -14,7 +14,7 @@ import {
   doc,
   getDocs,
 } from "firebase/firestore";
-import { Plus, Trash2, Package, MapPin, Loader, TrendingUp, Pencil, X, Save } from "lucide-react";
+import { Plus, Trash2, Package, MapPin, Loader, TrendingUp, Pencil, X, Save, AlertTriangle, RefreshCw } from "lucide-react";
 import { CameraIcon, ProductPlaceholder, BasketIcon } from "../components/Icons";
 import { useToast } from "../hooks/useToast";
 import "./Dashboard.css";
@@ -469,13 +469,16 @@ export default function Dashboard() {
                     <div className="my-product-img-ph"><ProductPlaceholder size={40} /></div>
                   )}
                   <div className="my-product-info">
-                    <h4>{p.name}</h4>
+                    <h4>
+                      {p.name}
+                      {Number(p.quantity) <= 0 && (
+                        <span className="stock-badge-sold-out"><AlertTriangle size={12} /> Agotado</span>
+                      )}
+                    </h4>
                     <p className="my-product-price">
-                      ${p.price} / {p.unit}
+                      ${Number(p.price).toLocaleString("es-MX")} / {p.unit}
                     </p>
-                    <p className="my-product-qty">
-                      {p.quantity} {p.unit} disponibles
-                    </p>
+                    <StockEditor product={p} onUpdate={showToast} />
                   </div>
                   <div className="my-product-actions">
                     <button
@@ -500,5 +503,55 @@ export default function Dashboard() {
 
       {toast && <div className={`toast ${toast.type}`}>{toast.message}</div>}
     </div>
+  );
+}
+
+function StockEditor({ product, onUpdate }) {
+  const [editing, setEditing] = useState(false);
+  const [qty, setQty] = useState(String(product.quantity));
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    const newQty = Number(qty);
+    if (isNaN(newQty) || newQty < 0) return;
+    setSaving(true);
+    try {
+      await updateDoc(doc(db, "products", product.id), { quantity: newQty });
+      onUpdate("Stock actualizado");
+      setEditing(false);
+    } catch (err) {
+      onUpdate("Error: " + err.message, "error");
+    }
+    setSaving(false);
+  };
+
+  if (editing) {
+    return (
+      <div className="stock-editor">
+        <input
+          type="number"
+          min="0"
+          step="0.01"
+          value={qty}
+          onChange={(e) => setQty(e.target.value)}
+          className="stock-input"
+          autoFocus
+        />
+        <span className="stock-unit">{product.unit}s</span>
+        <button className="btn btn-sm btn-primary stock-save" onClick={handleSave} disabled={saving}>
+          {saving ? "..." : <Save size={12} />}
+        </button>
+        <button className="btn btn-sm stock-cancel" onClick={() => { setEditing(false); setQty(String(product.quantity)); }}>
+          <X size={12} />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <p className="my-product-qty stock-clickable" onClick={() => setEditing(true)}>
+      {product.quantity} {product.unit}{Number(product.quantity) !== 1 && "s"}
+      <RefreshCw size={11} />
+    </p>
   );
 }

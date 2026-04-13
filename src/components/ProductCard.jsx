@@ -1,12 +1,20 @@
 import { Link } from "react-router-dom";
-import { MessageCircle, User, ShoppingCart } from "lucide-react";
+import { MessageCircle, User, ShoppingCart, AlertTriangle } from "lucide-react";
 import { ProductPlaceholder } from "./Icons";
 import "./ProductCard.css";
 
 export default function ProductCard({ product, onContact, showOrder }) {
+  const soldOut = Number(product.quantity) <= 0;
+
   return (
-    <div className="product-card card">
+    <div className={`product-card card ${soldOut ? "sold-out" : ""}`}>
       <div className="product-img-wrap">
+        {soldOut && (
+          <div className="sold-out-overlay">
+            <AlertTriangle size={24} />
+            <span>Agotado</span>
+          </div>
+        )}
         {product.imageUrl ? (
           <img src={product.imageUrl} alt={product.name} className="product-img" />
         ) : (
@@ -35,7 +43,7 @@ export default function ProductCard({ product, onContact, showOrder }) {
           {product.sellerName}
         </Link>
         <div className="product-actions">
-          {showOrder && (
+          {showOrder && !soldOut && (
             <Link to={`/pedido/${product.id}`} className="btn btn-sm btn-primary">
               <ShoppingCart size={14} /> Hacer Pedido
             </Link>

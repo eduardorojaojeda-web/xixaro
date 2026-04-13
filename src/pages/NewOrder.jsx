@@ -55,6 +55,21 @@ export default function NewOrder() {
     setLoading(true);
 
     try {
+      // Re-verificar stock actual antes de crear el pedido
+      const freshSnap = await getDoc(doc(db, "products", productId));
+      if (!freshSnap.exists()) {
+        showToast("Este producto ya no existe", "error");
+        setLoading(false);
+        return;
+      }
+      const freshProduct = freshSnap.data();
+      if (Number(quantity) > freshProduct.quantity) {
+        setErrors({ quantity: `Stock actualizado: solo hay ${freshProduct.quantity} ${freshProduct.unit}(s) disponibles` });
+        setProduct({ id: freshSnap.id, ...freshProduct });
+        setLoading(false);
+        return;
+      }
+
       const total = Number(quantity) * product.price;
 
       await addDoc(collection(db, "orders"), {

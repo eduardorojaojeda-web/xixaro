@@ -210,6 +210,19 @@ function VendorActions({ order }) {
         updatedAt: new Date().toISOString(),
       });
 
+      // Al confirmar, restar la cantidad del inventario del producto
+      if (order.status === "pendiente" && newStatus === "confirmado") {
+        const { getDoc } = await import("firebase/firestore");
+        const productSnap = await getDoc(doc(db, "products", order.productId));
+        if (productSnap.exists()) {
+          const currentQty = productSnap.data().quantity || 0;
+          const newQty = Math.max(0, currentQty - order.quantity);
+          await updateDoc(doc(db, "products", order.productId), {
+            quantity: newQty,
+          });
+        }
+      }
+
       // Notificar al comprador del cambio de estado
       rtdbPush(rtdbRef(rtdb, `orderNotifs/${order.buyerId}`), {
         type: "estado_actualizado",
