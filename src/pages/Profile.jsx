@@ -266,22 +266,22 @@ export default function Profile() {
           <div className="payment-inner">
             <CreditCard size={24} />
             <div>
-              <h3>Pago Seguro con Conecta</h3>
+              <h3>Pago Seguro con Conekta</h3>
               <p>Realiza tu primera transacción de forma segura</p>
             </div>
             <button
               className="btn btn-orange btn-sm"
               onClick={() => setShowPayment(!showPayment)}
             >
-              {showPayment ? "Cerrar" : "Pagar con Conecta"}
+              {showPayment ? "Cerrar" : "Pagar con Conekta"}
             </button>
           </div>
           {showPayment && (
             <div className="payment-placeholder">
               <div className="payment-box">
-                <p>🔒 Integración con API de Conecta</p>
+                <p>🔒 Integración con API de Conekta</p>
                 <p className="payment-note">
-                  Espacio reservado para el procesador de pagos Conecta.
+                  Espacio reservado para el procesador de pagos Conekta.
                   Aquí se integrará el formulario de pago seguro para la primera transacción.
                 </p>
                 <div className="payment-fields">
