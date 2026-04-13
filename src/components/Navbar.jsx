@@ -6,6 +6,7 @@ import { ref, onValue } from "firebase/database";
 import { Menu, X, ShoppingBag, User, LogOut, MessageCircle, Bell, LayoutDashboard, Package, Shield } from "lucide-react";
 import { LeafLogo } from "./Icons";
 import { useState, useEffect } from "react";
+import { requestNotificationPermission, usePushNotifications } from "../hooks/usePushNotifications";
 import "./Navbar.css";
 
 export default function Navbar() {
@@ -15,6 +16,14 @@ export default function Navbar() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [alertCount, setAlertCount] = useState(0);
   const [orderCount, setOrderCount] = useState(0);
+  const [adminCount, setAdminCount] = useState(0);
+
+  // Activar notificaciones push del navegador
+  usePushNotifications(currentUser, userData);
+
+  useEffect(() => {
+    if (currentUser) requestNotificationPermission();
+  }, [currentUser]);
 
   useEffect(() => {
     if (!currentUser) {
@@ -90,6 +99,31 @@ export default function Navbar() {
     return () => unsub();
   }, [currentUser]);
 
+  // Listen for admin notifications
+  useEffect(() => {
+    if (!currentUser || userData?.role !== "admin") {
+      setAdminCount(0);
+      return;
+    }
+
+    const adminNotifsRef = ref(rtdb, `adminNotifs/${currentUser.uid}`);
+    const unsub = onValue(
+      adminNotifsRef,
+      (snap) => {
+        const data = snap.val();
+        if (!data) { setAdminCount(0); return; }
+        let count = 0;
+        Object.values(data).forEach((n) => {
+          if (!n.read) count++;
+        });
+        setAdminCount(count);
+      },
+      () => setAdminCount(0)
+    );
+
+    return () => unsub();
+  }, [currentUser, userData]);
+
   const handleLogout = async () => {
     await signOut(auth);
     navigate("/");
@@ -117,8 +151,11 @@ export default function Navbar() {
           {currentUser ? (
             <>
               {userData?.role === "admin" && (
-                <Link to="/admin" onClick={() => setMenuOpen(false)}>
+                <Link to="/admin" onClick={() => setMenuOpen(false)} className="messages-link">
                   <Shield size={18} /> Admin
+                  {adminCount > 0 && (
+                    <span className="unread-badge">{adminCount > 9 ? "9+" : adminCount}</span>
+                  )}
                 </Link>
               )}
               {userData?.role === "vendedor" && (

@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { db } from "../firebase";
+import { useAuth } from "../contexts/AuthContext";
+import { db, rtdb } from "../firebase";
+import { ref as rtdbRef, onValue as rtdbOnValue, update as rtdbUpdate } from "firebase/database";
 import {
   collection,
   onSnapshot,
@@ -17,6 +19,7 @@ import { useToast } from "../hooks/useToast";
 import "./Admin.css";
 
 export default function Admin() {
+  const { currentUser } = useAuth();
   const [tab, setTab] = useState("stats");
   const [users, setUsers] = useState([]);
   const [products, setProducts] = useState([]);
@@ -42,6 +45,24 @@ export default function Admin() {
     });
     return () => { u1(); u2(); u3(); };
   }, []);
+
+  // Marcar notificaciones de admin como leidas al entrar
+  useEffect(() => {
+    if (!currentUser) return;
+    const notifsRef = rtdbRef(rtdb, `adminNotifs/${currentUser.uid}`);
+    const unsub = rtdbOnValue(notifsRef, (snap) => {
+      const data = snap.val();
+      if (!data) return;
+      const updates = {};
+      Object.entries(data).forEach(([id, n]) => {
+        if (!n.read) updates[`${id}/read`] = true;
+      });
+      if (Object.keys(updates).length > 0) {
+        rtdbUpdate(notifsRef, updates);
+      }
+    }, { onlyOnce: true });
+    return () => unsub();
+  }, [currentUser]);
 
   const stats = {
     totalUsers: users.length,

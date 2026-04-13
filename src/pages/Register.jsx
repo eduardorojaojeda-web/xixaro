@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
-import { auth, db } from "../firebase";
+import { doc, setDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { auth, db, rtdb } from "../firebase";
+import { ref as rtdbRef, push as rtdbPush } from "firebase/database";
 import { useAuth } from "../contexts/AuthContext";
 import { UserPlus, Sprout, Building2 } from "lucide-react";
 import { useToast } from "../hooks/useToast";
@@ -36,6 +37,22 @@ export default function Register() {
       };
       await setDoc(doc(db, "users", cred.user.uid), userData);
       setUserData({ id: cred.user.uid, ...userData });
+      // Notificar a todos los admins del nuevo registro
+      try {
+        const adminsSnap = await getDocs(query(collection(db, "users"), where("role", "==", "admin")));
+        adminsSnap.docs.forEach((adminDoc) => {
+          rtdbPush(rtdbRef(rtdb, `adminNotifs/${adminDoc.id}`), {
+            type: "nuevo_usuario",
+            userName: name,
+            userRole: role,
+            timestamp: Date.now(),
+            read: false,
+          });
+        });
+      } catch (e) {
+        console.error("Error notifying admins:", e);
+      }
+
       showToast("¡Cuenta creada exitosamente!");
       navigate(role === "vendedor" ? "/dashboard" : "/marketplace");
     } catch (err) {

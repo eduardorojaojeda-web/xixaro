@@ -259,6 +259,22 @@ export default function Dashboard() {
           console.error("Error sending alerts:", e);
         }
 
+        // Notificar a admins que hay un producto pendiente de aprobacion
+        try {
+          const adminsSnap = await getDocs(query(collection(db, "users"), where("role", "==", "admin")));
+          adminsSnap.docs.forEach((adminDoc) => {
+            rtdbPush(rtdbRef(rtdb, `adminNotifs/${adminDoc.id}`), {
+              type: "producto_pendiente",
+              productName: form.name,
+              sellerName: userData?.name || "Vendedor",
+              timestamp: Date.now(),
+              read: false,
+            });
+          });
+        } catch (e) {
+          console.error("Error notifying admins:", e);
+        }
+
         resetForm();
         showToast("¡Producto publicado!");
       }
