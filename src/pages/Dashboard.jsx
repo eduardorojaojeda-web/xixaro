@@ -182,8 +182,8 @@ export default function Dashboard() {
         );
         await uploadBytes(imgRef, imageFile);
         imageUrl = await getDownloadURL(imgRef);
-      } else if (typeof imageFile === "string" && imageFile.startsWith("http")) {
-        // Foto existente de una edicion (ya es URL de Storage)
+      } else if (typeof imageFile === "string" && imageFile.length > 0) {
+        // Foto existente (URL de Storage o base64 de productos antiguos)
         imageUrl = imageFile;
       }
 
