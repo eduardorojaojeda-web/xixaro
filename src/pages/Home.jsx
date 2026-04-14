@@ -131,8 +131,9 @@ export default function Home() {
             <span>Xixaro</span>
           </div>
           <div className="legal-links">
-            <Link to="/terminos">Términos y Condiciones</Link>
-            <Link to="/privacidad">Política de Privacidad</Link>
+            <Link to="/pitch">Presentación</Link>
+            <Link to="/terminos">Términos</Link>
+            <Link to="/privacidad">Privacidad</Link>
           </div>
           <p>Comercio agrícola directo. &copy; {new Date().getFullYear()}</p>
         </div>
