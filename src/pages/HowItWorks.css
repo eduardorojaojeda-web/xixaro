@@ -14,7 +14,8 @@
 }
 .hiw-hero p {
   font-size: 1.05rem;
-  color: var(--tierra-400);
+  color: #ffffff !important;
+  opacity: 0.85;
   max-width: 560px;
   margin: 0 auto;
   line-height: 1.7;
