@@ -3,7 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { signOut } from "firebase/auth";
 import { auth, rtdb } from "../firebase";
 import { ref, onValue } from "firebase/database";
-import { Menu, X, ShoppingBag, User, LogOut, MessageCircle, Bell, LayoutDashboard, Package, Shield } from "lucide-react";
+import { Menu, X, ShoppingBag, User, LogOut, MessageCircle, Bell, LayoutDashboard, Package, Shield, BarChart3 } from "lucide-react";
 import { LeafLogo } from "./Icons";
 import { useState, useEffect } from "react";
 import { requestNotificationPermission, usePushNotifications } from "../hooks/usePushNotifications";
@@ -147,8 +147,8 @@ export default function Navbar() {
           <Link to="/marketplace" onClick={() => setMenuOpen(false)}>
             <ShoppingBag size={18} /> Marketplace
           </Link>
-          <Link to="/como-funciona" onClick={() => setMenuOpen(false)}>
-            ¿Cómo funciona?
+          <Link to="/precios" onClick={() => setMenuOpen(false)}>
+            <BarChart3 size={18} /> Precios
           </Link>
 
           {currentUser ? (

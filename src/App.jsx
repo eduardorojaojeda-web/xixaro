@@ -15,6 +15,7 @@ import Orders from "./pages/Orders";
 import Admin from "./pages/Admin";
 import HowItWorks from "./pages/HowItWorks";
 import Pitch from "./pages/Pitch";
+import MarketPrices from "./pages/MarketPrices";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
@@ -37,6 +38,7 @@ function AppRoutes() {
         <Route path="/marketplace" element={<Marketplace />} />
         <Route path="/como-funciona" element={<HowItWorks />} />
         <Route path="/pitch" element={<Pitch />} />
+        <Route path="/precios" element={<MarketPrices />} />
         <Route path="/terminos" element={<Terms />} />
         <Route path="/privacidad" element={<Privacy />} />
         <Route path="/perfil/:userId" element={<Profile />} />

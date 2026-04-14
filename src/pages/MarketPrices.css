@@ -1,0 +1,193 @@
+.mp-prices { padding: 36px 20px; }
+
+.mpp-header { margin-bottom: 28px; }
+.mpp-header h1 {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 1.7rem; font-weight: 700; color: var(--verde-profundo);
+}
+.mpp-header p { color: var(--tierra-400); margin-top: 4px; }
+
+.mpp-search {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--white); border: 2px solid var(--tierra-200);
+  border-radius: 50px; padding: 0 22px; margin-bottom: 32px;
+  transition: border-color 0.2s;
+}
+.mpp-search:focus-within { border-color: var(--verde-hoja); }
+.mpp-search input {
+  flex: 1; border: none; padding: 14px 0; font-size: 1rem;
+  background: transparent; color: var(--tierra);
+}
+.mpp-search svg { color: var(--tierra-400); }
+
+.mpp-empty {
+  text-align: center; padding: 80px 20px; color: var(--tierra-400);
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+
+/* Card grid */
+.mpp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.mpp-card {
+  padding: 20px; text-align: left; cursor: pointer;
+  background: var(--white); width: 100%;
+}
+
+.mpp-card-top {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
+}
+.mpp-card-top h3 {
+  font-family: "DM Sans", sans-serif;
+  font-size: 1rem; font-weight: 700; color: var(--tierra);
+  text-transform: capitalize;
+}
+
+.trend-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 50px;
+  font-size: 0.7rem; font-weight: 700;
+}
+.trend-up { background: var(--verde-claro); color: var(--verde-profundo); }
+.trend-down { background: #fef2f2; color: var(--danger); }
+.trend-stable { background: var(--tierra-100); color: var(--tierra-500); }
+
+.mpp-card-price {
+  font-family: "Playfair Display", serif;
+  font-size: 1.6rem; font-weight: 800; color: var(--verde-profundo);
+  line-height: 1; margin-bottom: 6px;
+}
+.mpp-card-price span {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.75rem; font-weight: 500; color: var(--tierra-400);
+}
+
+.mpp-card-range {
+  display: flex; gap: 16px; font-size: 0.75rem; color: var(--tierra-400);
+  margin-bottom: 10px;
+}
+
+.mini-chart { width: 100%; height: 36px; margin-bottom: 8px; }
+
+.mpp-card-sellers {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.75rem; color: var(--tierra-400); font-weight: 500;
+}
+
+/* Detail */
+.mpp-detail { }
+.mpp-back { margin-bottom: 20px; }
+
+.mpp-detail-header {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 16px; margin-bottom: 28px;
+}
+.mpp-detail-header h2 {
+  font-size: 1.5rem; font-weight: 700; color: var(--tierra);
+  text-transform: capitalize; margin-bottom: 6px;
+}
+
+.mpp-detail-price { text-align: right; }
+.detail-avg {
+  font-family: "Playfair Display", serif;
+  font-size: 2.2rem; font-weight: 800; color: var(--verde-profundo);
+  line-height: 1;
+}
+.detail-unit { display: block; font-size: 0.8rem; color: var(--tierra-400); }
+
+.mpp-detail-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px; margin-bottom: 28px;
+}
+.mpp-stat {
+  background: var(--white); border: 1px solid var(--tierra-200);
+  border-radius: var(--radius-md); padding: 16px;
+  text-align: center;
+}
+.mpp-stat-label {
+  display: block; font-size: 0.68rem; font-weight: 600;
+  color: var(--tierra-400); text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.mpp-stat-value {
+  font-family: "Playfair Display", serif;
+  font-size: 1.3rem; font-weight: 700; color: var(--tierra);
+}
+.mpp-stat-avg { color: var(--verde-profundo); }
+
+/* Chart */
+.mpp-chart-section {
+  padding: 24px; margin-bottom: 20px;
+}
+.mpp-chart-section:hover { transform: none; }
+.mpp-chart-section h3 {
+  font-family: "DM Sans", sans-serif;
+  font-size: 1rem; font-weight: 700; color: var(--tierra);
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 18px;
+}
+
+.price-chart { width: 100%; height: auto; }
+.chart-note { font-size: 0.85rem; color: var(--tierra-400); text-align: center; padding: 24px; }
+
+/* Sellers */
+.mpp-sellers-section { padding: 24px; margin-bottom: 20px; }
+.mpp-sellers-section:hover { transform: none; }
+.mpp-sellers-section h3 {
+  font-family: "DM Sans", sans-serif;
+  font-size: 1rem; font-weight: 700; color: var(--tierra);
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 18px;
+}
+
+.sellers-table-wrap { overflow-x: auto; }
+.sellers-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.sellers-table th {
+  text-align: left; padding: 8px 12px; font-size: 0.7rem;
+  font-weight: 700; color: var(--tierra-400);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--tierra-200);
+}
+.sellers-table td { padding: 12px; border-bottom: 1px solid var(--tierra-100); }
+.sellers-table tr:hover td { background: var(--hueso); }
+
+.seller-name { font-weight: 600; color: var(--tierra); }
+.seller-price { font-weight: 700; color: var(--verde-profundo); }
+
+.diff-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 50px;
+  font-size: 0.72rem; font-weight: 700;
+}
+.diff-low { background: var(--verde-claro); color: var(--verde-profundo); }
+.diff-high { background: #fef2f2; color: var(--danger); }
+.diff-avg { background: var(--tierra-100); color: var(--tierra-500); }
+
+/* History */
+.mpp-history { padding: 24px; margin-bottom: 20px; }
+.mpp-history:hover { transform: none; }
+.mpp-history h3 {
+  font-family: "DM Sans", sans-serif;
+  font-size: 1rem; font-weight: 700; color: var(--tierra);
+  margin-bottom: 16px;
+}
+.history-list { display: flex; flex-direction: column; gap: 8px; }
+.history-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; background: var(--hueso);
+  border-radius: var(--radius-sm); font-size: 0.85rem;
+}
+.history-seller { flex: 1; font-weight: 600; color: var(--tierra); }
+.history-price { font-weight: 700; color: var(--verde-profundo); }
+.history-date { font-size: 0.75rem; color: var(--tierra-400); }
+
+@media (max-width: 768px) {
+  .mpp-detail-header { flex-direction: column; align-items: flex-start; }
+  .mpp-detail-price { text-align: left; }
+  .mpp-detail-stats { grid-template-columns: 1fr 1fr; }
+  .mpp-grid { grid-template-columns: 1fr; }
+}
