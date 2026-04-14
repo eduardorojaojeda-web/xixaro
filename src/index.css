@@ -34,8 +34,41 @@
   --radius-xl: 24px;
 }
 
+[data-theme="dark"] {
+  --verde-profundo: #4A7C1F;
+  --verde-hoja: #6B9B3A;
+  --verde-suave: #8ab955;
+  --verde-claro: #1e2e14;
+  --verde-bg: #1a2212;
+  --naranja: #f07830;
+  --naranja-hover: #e8621a;
+  --naranja-claro: #2a1a10;
+  --dorado: #e0b84d;
+  --dorado-claro: #2a2410;
+  --crema: #e8e0d4;
+  --hueso: #141410;
+  --tierra: #e8e0d4;
+  --tierra-700: #c5c0b0;
+  --tierra-600: #a8a294;
+  --tierra-500: #8a8474;
+  --tierra-400: #6b6658;
+  --tierra-300: #3a3830;
+  --tierra-200: #2a2820;
+  --tierra-100: #1e1c16;
+  --white: #1c1c16;
+  --danger: #e74c3c;
+
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
 
 body {
   font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;

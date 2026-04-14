@@ -3,16 +3,18 @@ import { useAuth } from "../contexts/AuthContext";
 import { signOut } from "firebase/auth";
 import { auth, rtdb } from "../firebase";
 import { ref, onValue } from "firebase/database";
-import { Menu, X, ShoppingBag, User, LogOut, MessageCircle, Bell, LayoutDashboard, Package, Shield, BarChart3 } from "lucide-react";
+import { Menu, X, ShoppingBag, User, LogOut, MessageCircle, Bell, LayoutDashboard, Package, Shield, BarChart3, Sun, Moon } from "lucide-react";
 import { LeafLogo } from "./Icons";
 import { useState, useEffect } from "react";
 import { requestNotificationPermission, usePushNotifications } from "../hooks/usePushNotifications";
+import { useTheme } from "../hooks/useTheme";
 import "./Navbar.css";
 
 export default function Navbar() {
   const { currentUser, userData } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
   const [unreadCount, setUnreadCount] = useState(0);
   const [alertCount, setAlertCount] = useState(0);
   const [orderCount, setOrderCount] = useState(0);
@@ -139,9 +141,14 @@ export default function Navbar() {
           <span className="brand-text">Xixaro</span>
         </Link>
 
-        <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
-          {menuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="navbar-right-controls">
+          <button className="theme-toggle" onClick={toggleTheme} title={theme === "light" ? "Modo oscuro" : "Modo claro"}>
+            {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+          </button>
+          <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
+            {menuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
 
         <div className={`navbar-links ${menuOpen ? "open" : ""}`}>
           <Link to="/marketplace" onClick={() => setMenuOpen(false)}>
