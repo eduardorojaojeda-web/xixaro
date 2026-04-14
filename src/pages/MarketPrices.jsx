@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { db } from "../firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import { Search, TrendingUp, TrendingDown, Minus, BarChart3, Users } from "lucide-react";
@@ -210,8 +211,9 @@ function ProductDetail({ data, onBack }) {
   const sorted = [...data.sorted].sort((a, b) => (a.date || "").localeCompare(b.date || ""));
   const sellers = {};
   data.products.forEach((p) => {
+    if (!p.sellerId) return;
     if (!sellers[p.sellerId]) {
-      sellers[p.sellerId] = { name: p.sellerName, price: p.price, id: p.sellerId };
+      sellers[p.sellerId] = { name: p.sellerName || "Vendedor", price: p.price, id: p.sellerId };
     }
   });
   const sellerList = Object.values(sellers).sort((a, b) => a.price - b.price);
@@ -294,7 +296,11 @@ function ProductDetail({ data, onBack }) {
                       </span>
                     </td>
                     <td>
-                      <a href={`/perfil/${s.id}`} className="btn btn-sm btn-outline">Ver perfil</a>
+                      {s.id ? (
+                        <Link to={`/perfil/${s.id}`} className="btn btn-sm btn-outline">Ver perfil</Link>
+                      ) : (
+                        <span style={{ fontSize: "0.75rem", color: "var(--tierra-400)" }}>No disponible</span>
+                      )}
                     </td>
                   </tr>
                 );
